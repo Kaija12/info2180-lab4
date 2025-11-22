@@ -1,20 +1,44 @@
-document.addEventListener("DOMContentLoaded", function () {
-    const button = document.getElementById("search");
-
-    button.addEventListener("click", function () {
+document.addEventListener('DOMContentLoaded', function() {
+    const searchButton = document.getElementById('search');
+    const searchForm = document.getElementById('search-form');
+    const searchInput = document.getElementById('searchInput');
+    const resultDiv = document.getElementById('result');
+    
+    function performSearch() {
+        const query = searchInput.value.trim();
+        const url = query ? `superheroes.php?query=${encodeURIComponent(query)}` : 'superheroes.php';
+        
         const xhr = new XMLHttpRequest();
-
-        xhr.onreadystatechange = function () {
-            if (xhr.readyState === 4 && xhr.status === 200) {
-                alert(xhr.responseText);   // shows raw HTML tags like in your image
+        xhr.open('GET', url, true);
+        
+        xhr.onload = function() {
+            if (xhr.status === 200) {
+                resultDiv.innerHTML = xhr.responseText;
+            } else {
+                resultDiv.innerHTML = '<p class="not-found">Error loading data.</p>';
             }
         };
-
-        xhr.open("GET", "superheroes.php", true);
+        
+        xhr.onerror = function() {
+            resultDiv.innerHTML = '<p class="not-found">Request failed.</p>';
+        };
+        
         xhr.send();
+    }
+    
+    // Load default list when page first loads
+    performSearch();
+    
+    // Form submission
+    searchForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        performSearch();
     });
-}); 
-
-
-
-
+    
+    // Enter key
+    searchInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            performSearch();
+        }
+    });
+});
